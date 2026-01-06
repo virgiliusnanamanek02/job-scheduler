@@ -1,7 +1,14 @@
 package main
 
 import (
+	"context"
+	_ "github.com/lib/pq"
+	"github.com/virgiliusnanamanek02/job-scheduler/internal/job"
+	"github.com/virgiliusnanamanek02/job-scheduler/internal/worker"
 	"log"
+	"os"
+	"os/signal"
+	"time"
 
 	"github.com/virgiliusnanamanek02/job-scheduler/internal/config"
 )
@@ -31,4 +38,22 @@ func main() {
 	}
 
 	log.Println("Application started successfully")
+
+	switch os.Getenv("APP_MODE") {
+	case "worker":
+		repo := job.NewRepository(db)
+		w := worker.New(
+			repo,
+			30*time.Second, // lease duration
+			2*time.Second,  // poll interval
+		)
+
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+		defer stop()
+
+		w.Run(ctx)
+
+	default:
+		log.Fatalf("unsupported APP_MODE")
+	}
 }
