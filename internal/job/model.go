@@ -28,31 +28,31 @@ type Job struct {
 	UpdatedAt   time.Time
 }
 
-func (j *Job) CanRetry() bool {
-	return j.Attempts < j.MaxAttempts
+func (job *Job) CanRetry() bool {
+	return job.Attempts < job.MaxAttempts
 }
 
-func (j Job) MarkRunning(workerID string, leaseUntil time.Time) {
+func (job Job) MarkRunning(workerID string, leaseUntil time.Time) {
 	now := time.Now()
-	j.Status = StatusRunning
-	j.LockedBy = &workerID
-	j.LockedAt = &now
-	j.LeaseUntil = &leaseUntil
-	j.UpdatedAt = now
+	job.Status = StatusRunning
+	job.LockedBy = &workerID
+	job.LockedAt = &now
+	job.LeaseUntil = &leaseUntil
+	job.UpdatedAt = now
 }
 
-func (j *Job) MarkFailed(err error) {
+func (job *Job) MarkFailed(err error) {
 	now := time.Now()
 	msg := err.Error()
 
-	j.Status = StatusFailed
-	j.Attempts++
-	j.LastError = &msg
-	j.UpdatedAt = now
+	job.Status = StatusFailed
+	job.Attempts++
+	job.LastError = &msg
+	job.UpdatedAt = now
 }
 
-func (j *Job) MarkSucceeded() {
+func (job *Job) MarkSucceeded() {
 	now := time.Now()
-	j.Status = StatusSucceeded
-	j.UpdatedAt = now
+	job.Status = StatusSucceeded
+	job.UpdatedAt = now
 }
